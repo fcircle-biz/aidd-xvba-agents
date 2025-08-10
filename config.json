@@ -1,6 +1,6 @@
 {
-    "app_name": "商品在庫管理システム",
-    "description": "商品マスタ管理・在庫管理・レポート機能を備えた本格的な在庫管理システム",
+    "app_name": "サンプルアプリ",
+    "description": "このアプリはXVBAを使用して開発されました。",
     "author": "XVBA Development Team",
     "email": "support@xvba.dev",
     "create_ate": "Mon Aug 11 2025 02:40:17 GMT+0900 (日本標準時)",
