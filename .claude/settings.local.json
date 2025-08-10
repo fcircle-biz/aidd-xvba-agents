@@ -3,7 +3,9 @@
     "allow": [
       "Bash(convert.bat)",
       "Bash(cmd:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(powershell:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }

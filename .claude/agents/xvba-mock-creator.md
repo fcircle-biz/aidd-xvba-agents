@@ -17,7 +17,7 @@ XVBAプロジェクト環境の作成を依頼された場合、以下を実行�
    - customize/vba-files/内のUTF-8開発ファイル
    - vba-files/内のShift-JIS本番ファイル構造
    - パッケージディレクトリ（xvba_modules/）
-   - PowerShell変換スクリプト（convert.ps1）
+   - PowerShell変換スクリプト（xvba_pre_export.ps1）
 
 3. **機能的なコードの生成**: 以下を含む動作するVBAサンプルコードを作成します：
    - ユーティリティ関数、ログ機能、Xdebug統合を含むcommon.bas
@@ -31,7 +31,7 @@ XVBAプロジェクト環境の作成を依頼された場合、以下を実行�
    - デバッグサポート用のXdebug
    - 適切なバージョン指定
 
-5. **変換システムの作成**: 以下の機能を持つ堅牢なPowerShellスクリプト（convert.ps1）を構築します：
+5. **変換システムの作成**: 以下の機能を持つ堅牢なPowerShellスクリプト（xvba_pre_export.ps1）を構築します：
    - UTF-8ファイルをShift-JISエンコーディングに変換
    - .bas、.cls、.frmファイルを処理
    - 進捗フィードバックとエラーハンドリングを提供
@@ -60,3 +60,53 @@ XVBAプロジェクト環境の作成を依頼された場合、以下を実行�
 VS Code統合、適切なエンコーディング処理、デバッグ機能を備えた最新のExcel VBA開発に開発者がすぐに使用できる本番対応のXVBA環境を作成します。作成するすべてのファイルは機能的でXVBAのベストプラクティスに従う必要があります。
 
 常にユーザーが提供する実際のプロジェクト名で{project-name}プレースホルダーを置換し、プロジェクト構造全体でファイル参照の整合性を確保してください。
+
+## VBA生成時の重要な注意事項
+
+### ボタンマクロ参照
+VBAでButtonオブジェクトのOnActionプロパティを設定する際は、以下の点に注意してください：
+
+- **シートクラス内のプロシージャ**: `"Sheet1.ProcedureName"`形式で参照
+- **標準モジュール内のプロシージャ**: `"ModuleName.ProcedureName"`または`"ProcedureName"`で参照
+- **Public宣言の確認**: 呼び出されるプロシージャは必ずPublicとして宣言する
+
+例：
+```vba
+' 正しい例（Sheet1.cls内でのボタン作成）
+btn.OnAction = "Sheet1.AddOrUpdateProduct_Click"
+
+' 正しい例（標準モジュール内でのボタン作成）
+btn.OnAction = "common.GenerateReport"
+
+' 間違った例（シートクラスのメソッドを直接参照）
+btn.OnAction = "AddOrUpdateProduct_Click"  ' エラーになる可能性
+```
+
+### サンプルデータ自動生成
+初期化時のサンプルデータ作成では以下に注意：
+
+- **関数の配置**: サンプルデータ作成関数は標準モジュール（common.bas）に配置
+- **初回チェック**: データが既に存在する場合はスキップする仕組みを実装
+- **エラーハンドリング**: サンプルデータ作成失敗時の適切な処理を含める
+
+### シート管理とエンコーディング
+- **既存シート活用**: 新規シート作成ではなく、既存のSheet1-9を活用・リネーム
+- **エンコーディング統一**: 開発はUTF-8、本番はShift-JISで変換システムを確保
+- **関数のアクセシビリティ**: commonモジュール内の関数は必要に応じてPublic宣言
+
+### システム初期化パターン
+```vba
+' ThisWorkbook.clsでの推奨初期化パターン
+Private Sub Workbook_Open()
+    Call InitializeSystem
+    Call CreateInitialSampleData  ' 初回のみ実行
+    Call ShowSplashScreen
+End Sub
+
+Private Sub CreateInitialSampleData()
+    ' データ存在チェック → サンプルデータ作成
+    If IsDataEmpty() Then
+        Call CreateSampleData  ' 標準モジュールの関数を呼び出し
+    End If
+End Sub
+```

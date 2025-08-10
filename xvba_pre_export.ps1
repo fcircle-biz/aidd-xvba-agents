@@ -1,13 +1,13 @@
-# VBA File Conversion Tool (PowerShell)
-# Convert from UTF-8 to Shift-JIS encoding
+# XVBA Pre-Export Tool (PowerShell)
+# Convert from UTF-8 to Shift-JIS encoding for Excel VBA export
 
 Write-Host "========================================"
-Write-Host "VBA File Conversion Tool"
+Write-Host "XVBA Pre-Export Tool"
 Write-Host "========================================"
 Write-Host ""
 
-$sourceDir = "C:\git\aidd-vba-product-mgr\customize\vba-files"
-$targetDir = "C:\git\aidd-vba-product-mgr\vba-files"
+$sourceDir = Join-Path $PSScriptRoot "customize\vba-files"
+$targetDir = Join-Path $PSScriptRoot "vba-files"
 
 Write-Host "Source: $sourceDir"
 Write-Host "Target: $targetDir"
@@ -26,7 +26,32 @@ if (!(Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir -Fo
 if (!(Test-Path "$targetDir\Module")) { New-Item -ItemType Directory -Path "$targetDir\Module" -Force | Out-Null }
 if (!(Test-Path "$targetDir\Class")) { New-Item -ItemType Directory -Path "$targetDir\Class" -Force | Out-Null }
 
-Write-Host "Converting files to SHIFT-JIS encoding..."
+# Copy base Excel file to target name from config.json
+Write-Host "Preparing Excel workbook file..."
+try {
+    $configPath = Join-Path $PSScriptRoot "config.json"
+    if (Test-Path $configPath) {
+        $config = Get-Content $configPath | ConvertFrom-Json
+        $excelFileName = $config.excel_file
+        
+        $baseFilePath = Join-Path $PSScriptRoot "basefile.xlsm"
+        $targetFilePath = Join-Path $PSScriptRoot $excelFileName
+        
+        if (Test-Path $baseFilePath) {
+            # Copy basefile.xlsm to target Excel file (overwrite if exists)
+            Copy-Item $baseFilePath $targetFilePath -Force
+            Write-Host "Excel file prepared: $excelFileName" -ForegroundColor Green
+        } else {
+            Write-Host "Warning: basefile.xlsm not found - skipping Excel file preparation" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "Warning: config.json not found - skipping Excel file preparation" -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host "Error preparing Excel file: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+Write-Host "Converting files to SHIFT-JIS encoding for Excel VBA export..."
 
 try {
     $convertedFiles = @()
@@ -51,7 +76,7 @@ try {
     
     Write-Host ""
     Write-Host "========================================"
-    Write-Host "Conversion Complete" -ForegroundColor Green
+    Write-Host "Pre-Export Conversion Complete" -ForegroundColor Green
     Write-Host "========================================"
     Write-Host ""
     Write-Host "Files converted:"
