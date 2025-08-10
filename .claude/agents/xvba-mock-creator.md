@@ -20,7 +20,11 @@ XVBAプロジェクト環境の作成を依頼された場合、以下を実行�
    - PowerShell変換スクリプト（xvba_pre_export.ps1）
 
 3. **機能的なコードの生成**: 以下を含む動作するVBAサンプルコードを作成します：
-   - ユーティリティ関数、ログ機能、Xdebug統合を含むcommon.bas
+   - **モジュラー構造のVBA**: 機能別にmod*.bas形式で細分化
+     - modConstants.bas: システム定数定義
+     - modData.bas: データアクセス層（GetTable, LogError, LogAudit等）
+     - modBusiness.bas: ビジネスロジック（業務処理、バリデーション等）
+     - modUI.bas: UI操作関数（フォーム表示、レポート表示等）
    - ワークシートイベントハンドラとデータ操作を含むSheet1.cls
    - ワークブックイベントと初期化を含むThisWorkbook.cls
    - すべてのコードは適切なXVBAパターンとデバッグ統合を実証する必要があります
@@ -76,7 +80,7 @@ VBAでButtonオブジェクトのOnActionプロパティを設定する際は、
 btn.OnAction = "Sheet1.AddOrUpdateProduct_Click"
 
 ' 正しい例（標準モジュール内でのボタン作成）
-btn.OnAction = "common.GenerateReport"
+btn.OnAction = "modBusiness.GenerateReport"
 
 ' 間違った例（シートクラスのメソッドを直接参照）
 btn.OnAction = "AddOrUpdateProduct_Click"  ' エラーになる可能性
@@ -85,14 +89,14 @@ btn.OnAction = "AddOrUpdateProduct_Click"  ' エラーになる可能性
 ### サンプルデータ自動生成
 初期化時のサンプルデータ作成では以下に注意：
 
-- **関数の配置**: サンプルデータ作成関数は標準モジュール（common.bas）に配置
+- **関数の配置**: サンプルデータ作成関数は適切なモジュール（modBusiness.bas等）に配置
 - **初回チェック**: データが既に存在する場合はスキップする仕組みを実装
 - **エラーハンドリング**: サンプルデータ作成失敗時の適切な処理を含める
 
 ### シート管理とエンコーディング
 - **既存シート活用**: 新規シート作成ではなく、既存のSheet1-9を活用・リネーム
 - **エンコーディング統一**: 開発はUTF-8、本番はShift-JISで変換システムを確保
-- **関数のアクセシビリティ**: commonモジュール内の関数は必要に応じてPublic宣言
+- **関数のアクセシビリティ**: mod*.basモジュール内の関数は必要に応じてPublic宣言
 
 ### システム初期化パターン
 ```vba
@@ -106,7 +110,7 @@ End Sub
 Private Sub CreateInitialSampleData()
     ' データ存在チェック → サンプルデータ作成
     If IsDataEmpty() Then
-        Call CreateSampleData  ' 標準モジュールの関数を呼び出し
+        Call modBusiness.CreateSampleData  ' 適切なモジュールの関数を呼び出し
     End If
 End Sub
 ```
@@ -127,7 +131,19 @@ employeeData = Array( _
 )
 
 ' 推奨パターン（ヘルパー関数使用）
-Call AddEmployeeRecord(ws, "EMP001", "山田", "営業部")
-Call AddEmployeeRecord(ws, "EMP002", "佐藤", "人事部")
+Call modBusiness.AddEmployeeRecord(ws, "EMP001", "山田", "営業部")
+Call modBusiness.AddEmployeeRecord(ws, "EMP002", "佐藤", "人事部")
 ' 行継続文字を使わないため制限なし
 ```
+
+### モジュラー構造の重要性
+
+- **VBAインポート制限**: 1つのファイルが大きくなりすぎるとVBAエディタでのインポートが困難になる
+- **保守性**: 機能別に分割することで、コードの理解と修正が容易になる  
+- **再利用性**: モジュールごとの独立性により、他のプロジェクトでの再利用が可能
+
+**推奨モジュール構成**:
+- `modConstants.bas`: システム定数（テーブル名、シート名、ステータス値等）
+- `modData.bas`: データアクセス機能（GetTable, LogError, LogAudit等）
+- `modBusiness.bas`: ビジネスロジック（業務処理、計算、バリデーション）
+- `modUI.bas`: UI操作（フォーム表示、レポート生成、画面制御）
