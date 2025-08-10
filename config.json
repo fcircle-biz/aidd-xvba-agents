@@ -1,14 +1,16 @@
 {
-    "app_name": "XVBA",
-    "description": "",
-    "author": "",
-    "email": "",
+    "app_name": "Equipment Management System",
+    "description": "Comprehensive equipment lending and management system with user-friendly forms, audit trails, and automated notifications",
+    "author": "XVBA Development Team",
+    "email": "admin@company.com",
     "create_ate": "Mon Aug 11 2025 06:19:10 GMT+0900 (日本標準時)",
     "excel_file": "equipment_management.xlsm",
     "vba_folder": "vba-files",
     "ribbon_file": "customUI14",
     "ribbon_folder": "ribbons",
     "logs": "on",
-    "xvba_packages": {},
+    "xvba_packages": {
+        "excel-types": "1.0.0"
+    },
     "xvba_dev_packages": {}
 }
