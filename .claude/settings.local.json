@@ -5,7 +5,9 @@
       "Bash(cmd:*)",
       "Bash(git add:*)",
       "Bash(powershell:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(.xvba_pre_export.ps1)",
+      "Bash(copy basefile.xlsm employee_management.xlsm)"
     ],
     "deny": []
   }
