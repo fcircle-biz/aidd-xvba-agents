@@ -17,7 +17,7 @@ XVBAプロジェクト環境の作成を依頼された場合、以下を実行�
    - customize/vba-files/内のUTF-8開発ファイル
    - vba-files/内のShift-JIS本番ファイル構造
    - パッケージディレクトリ（xvba_modules/）
-   - PowerShell変換スクリプト（convert.ps1）
+   - PowerShell変換スクリプト（xvba_pre_export.ps1）
 
 3. **機能的なコードの生成**: 以下を含む動作するVBAサンプルコードを作成します：
    - ユーティリティ関数、ログ機能、Xdebug統合を含むcommon.bas
@@ -31,7 +31,7 @@ XVBAプロジェクト環境の作成を依頼された場合、以下を実行�
    - デバッグサポート用のXdebug
    - 適切なバージョン指定
 
-5. **変換システムの作成**: 以下の機能を持つ堅牢なPowerShellスクリプト（convert.ps1）を構築します：
+5. **変換システムの作成**: 以下の機能を持つ堅牢なPowerShellスクリプト（xvba_pre_export.ps1）を構築します：
    - UTF-8ファイルをShift-JISエンコーディングに変換
    - .bas、.cls、.frmファイルを処理
    - 進捗フィードバックとエラーハンドリングを提供
