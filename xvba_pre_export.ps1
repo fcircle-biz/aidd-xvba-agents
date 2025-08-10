@@ -1,8 +1,8 @@
-# VBA File Conversion Tool (PowerShell)
-# Convert from UTF-8 to Shift-JIS encoding
+# XVBA Pre-Export Tool (PowerShell)
+# Convert from UTF-8 to Shift-JIS encoding for Excel VBA export
 
 Write-Host "========================================"
-Write-Host "VBA File Conversion Tool"
+Write-Host "XVBA Pre-Export Tool"
 Write-Host "========================================"
 Write-Host ""
 
@@ -26,7 +26,7 @@ if (!(Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir -Fo
 if (!(Test-Path "$targetDir\Module")) { New-Item -ItemType Directory -Path "$targetDir\Module" -Force | Out-Null }
 if (!(Test-Path "$targetDir\Class")) { New-Item -ItemType Directory -Path "$targetDir\Class" -Force | Out-Null }
 
-Write-Host "Converting files to SHIFT-JIS encoding..."
+Write-Host "Converting files to SHIFT-JIS encoding for Excel VBA export..."
 
 try {
     $convertedFiles = @()
@@ -51,7 +51,7 @@ try {
     
     Write-Host ""
     Write-Host "========================================"
-    Write-Host "Conversion Complete" -ForegroundColor Green
+    Write-Host "Pre-Export Conversion Complete" -ForegroundColor Green
     Write-Host "========================================"
     Write-Host ""
     Write-Host "Files converted:"
