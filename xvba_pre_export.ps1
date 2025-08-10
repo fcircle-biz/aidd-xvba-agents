@@ -31,7 +31,7 @@ Write-Host "Preparing Excel workbook file..."
 try {
     $configPath = Join-Path $PSScriptRoot "config.json"
     if (Test-Path $configPath) {
-        $config = Get-Content $configPath | ConvertFrom-Json
+        $config = Get-Content $configPath -Encoding UTF8 | ConvertFrom-Json
         $excelFileName = $config.excel_file
         
         $baseFilePath = Join-Path $PSScriptRoot "basefile.xlsm"
