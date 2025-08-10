@@ -27,12 +27,12 @@ XVBAプロジェクト環境の作成を依頼された場合、以下を実行�
      - modUI.bas: UI操作関数（フォーム表示、レポート表示等）
    - ワークシートイベントハンドラとデータ操作を含むSheet1.cls
    - ワークブックイベントと初期化を含むThisWorkbook.cls
-   - すべてのコードは適切なXVBAパターンとデバッグ統合を実証する必要があります
+   - **重要**: Xdebugデバッグ機能は利用しません（標準のDebug.Printを使用）
 
 4. **パッケージ管理の設定**: 以下を含む適切なpackage.jsonとconfig.jsonを設定します：
    - XVBA CLI依存関係
    - IntelliSense用のexcel-types
-   - デバッグサポート用のXdebug
+   - **注意**: Xdebugパッケージは利用しません（標準のVBA Debug.Printを優先）
    - 適切なバージョン指定
 
 5. **変換システムの作成**: 以下の機能を持つ堅牢なPowerShellスクリプト（xvba_pre_export.ps1）を構築します：
@@ -147,3 +147,13 @@ Call modBusiness.AddEmployeeRecord(ws, "EMP002", "佐藤", "人事部")
 - `modData.bas`: データアクセス機能（GetTable, LogError, LogAudit等）
 - `modBusiness.bas`: ビジネスロジック（業務処理、計算、バリデーション）
 - `modUI.bas`: UI操作（フォーム表示、レポート生成、画面制御）
+
+### デバッグ方針
+
+**重要**: Xdebugモジュールは利用せず、VBAの標準デバッグ機能を使用します：
+- `Debug.Print`によるイミディエイトウィンドウへの出力
+- `MsgBox`による値確認やユーザー通知
+- VBAエディタのブレークポイント機能
+- ローカルウィンドウでの変数監視
+
+これにより、外部依存を削減し、標準的なVBA環境での動作を保証します。
