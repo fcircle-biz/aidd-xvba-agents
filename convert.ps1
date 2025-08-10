@@ -6,8 +6,8 @@ Write-Host "VBA File Conversion Tool"
 Write-Host "========================================"
 Write-Host ""
 
-$sourceDir = "C:\git\aidd-vba-product-mgr\customize\vba-files"
-$targetDir = "C:\git\aidd-vba-product-mgr\vba-files"
+$sourceDir = Join-Path $PSScriptRoot "customize\vba-files"
+$targetDir = Join-Path $PSScriptRoot "vba-files"
 
 Write-Host "Source: $sourceDir"
 Write-Host "Target: $targetDir"
