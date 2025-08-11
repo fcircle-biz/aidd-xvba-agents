@@ -1,8 +1,0 @@
-customer_id,customer_name,email,phone,zip,address1,address2,category,status
-CUST001,株式会社テスト,test@example.com,03-1234-5678,100-0001,東京都千代田区,千代田1-1-1,B2B,有効
-CUST002,山田太郎,yamada@test.co.jp,090-1111-2222,150-0001,東京都渋谷区,渋谷2-2-2,B2C,有効
-CUST003,佐藤商事,sato@business.co.jp,06-3333-4444,530-0001,大阪府大阪市北区,梅田3-3-3,代理店,有効
-CUST004,田中花子,tanaka@personal.com,080-5555-6666,220-0001,神奈川県横浜市西区,みなとみらい4-4-4,B2C,有効
-CUST005,鈴木工業株式会社,info@suzuki-industry.co.jp,052-7777-8888,460-0001,愛知県名古屋市中区,錦5-5-5,B2B,有効
-CUST006,高橋一郎,takahashi@sample.jp,078-9999-0000,650-0001,兵庫県神戸市中央区,三宮6-6-6,B2C,無効
-CUST007,パートナー商会,partner@trade.co.jp,092-1111-3333,810-0001,福岡県福岡市中央区,天神7-7-7,パートナー,有効
