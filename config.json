@@ -1,14 +1,36 @@
 {
-    "app_name": "Equipment Management System",
-    "description": "Comprehensive equipment lending and management system with user-friendly forms, audit trails, and automated notifications",
+    "app_name": "備品貸出管理システム",
+    "description": "社内備品の貸出・返却状況を一元管理し、利用履歴や在庫状況を可視化するシステム",
     "author": "XVBA Development Team",
     "email": "admin@company.com",
-    "create_ate": "Mon Aug 11 2025 06:19:10 GMT+0900 (日本標準時)",
-    "excel_file": "equipment_management.xlsm",
+    "version": "1.0.0",
+    "create_date": "Mon Aug 11 2025 06:19:10 GMT+0900 (日本標準時)",
+    "excel_file": "equipment_lending_system.xlsm",
     "vba_folder": "vba-files",
     "ribbon_file": "customUI14",
     "ribbon_folder": "ribbons",
     "logs": "on",
+    "features": {
+        "lending_management": true,
+        "return_management": true,
+        "dashboard_kpi": true,
+        "overdue_tracking": true,
+        "audit_logging": true,
+        "test_data_generation": true,
+        "color_coding": true,
+        "real_time_updates": true
+    },
+    "database_tables": {
+        "items": "ItemsTable",
+        "lending": "LendingTable"
+    },
+    "sheet_mapping": {
+        "Sheet1": "Dashboard",
+        "Sheet2": "Items",
+        "Sheet3": "Lending",
+        "Sheet4": "Input",
+        "Sheet5": "_Config"
+    },
     "xvba_packages": {
         "excel-types": "1.0.0"
     },

@@ -48,7 +48,8 @@ project-name/
 **重要**: 新規シート作成ではなく、既存のSheet1-9を業務用途に応じてリネーム
 
 ```vba
-' ThisWorkbook.clsでの推奨初期化パターン
+' ThisWorkbook.clsでの推奨初期化パターン（セキュリティ重視）
+' 注意：Workbook_BeforeClose、Workbook_BeforeSave は実装禁止
 Private Sub Workbook_Open()
     Call InitializeSheetNames
     Call InitializeSystem
@@ -64,6 +65,10 @@ Private Sub InitializeSheetNames()
     ThisWorkbook.Worksheets("Sheet5").Name = "システム設定"
     On Error GoTo 0
 End Sub
+
+' ⚠️ セキュリティ重要事項 ⚠️
+' Workbook_BeforeClose と Workbook_BeforeSave イベントは実装禁止
+' 理由：自動保存やファイル操作の阻害、セキュリティリスクのため
 ```
 
 **シート定数での管理**:
