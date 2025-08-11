@@ -43,14 +43,12 @@ Excel VBAプロジェクト用の完全なXVBA（Extended VBA）開発環境を�
 
 ## 開発ワークフロー
 
-1. **初期設定** `xvba-macro list` XVBA Config Bootstrapで初期設定
-2. **XLSX準備**  `basefile.xlsm`をリネームしてコピーする。その後、config.jsonのexcel_fileを修正
-3. **インポート**  `xvba-macro list` Import VBAを実行
-4. **モック生成**: `@xvba-mock-creator <作りたいモック情報>` でカスタマイズファイルを生成
-5. **開発**: `customize/vba-files/` でVBAソースコードを編集（UTF-8エンコーディング）
-6. **ビルド**: `.\xvba_pre_export.ps1` を実行してExcel用ファイルを生成
-7. **エクスポート**: `xvba-macro list` でVBAモジュールをExcelに一括エクスポート
-8. **テスト**: Excel上でVBAコードをテスト・デバッグ
+1. **初期設定** config.jsonのexcel_fileを修正
+2. **モック生成**: `@xvba-mock-creator <作りたいモック情報>` でカスタマイズファイルを生成。
+3. **開発**: `customize/vba-files/` でVBAソースコードを編集（UTF-8エンコーディング）
+4. **ビルド**: `.\xvba_pre_export.ps1` を実行してExcel用ファイルを生成
+5. **エクスポート**: `xvba-macro list` でVBAモジュールをExcelに一括エクスポート
+6. **テスト**: Excel上でVBAコードをテスト・デバッグ
 
 参考）https://note.com/kiyo_ai_note/n/n9653e7238c49
 
