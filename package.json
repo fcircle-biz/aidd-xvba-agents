@@ -1,13 +1,67 @@
 {
-    "name": "xvba-app",
+    "name": "equipment-lending-system",
     "version": "1.0.0",
-    "description": "A XVBA App",
-    "main": "index.js",
-    "author": "LocalSmart",
-    "license": "ISC",
+    "description": "備品貸出管理システム - 社内備品の貸出・返却状況を一元管理するExcel VBAアプリケーション",
+    "main": "equipment_lending_system.xlsm",
+    "keywords": [
+        "excel",
+        "vba",
+        "equipment",
+        "lending",
+        "management",
+        "dashboard",
+        "inventory",
+        "tracking"
+    ],
+    "author": {
+        "name": "XVBA Development Team",
+        "email": "admin@company.com"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/company/equipment-lending-system.git"
+    },
+    "bugs": {
+        "url": "https://github.com/company/equipment-lending-system/issues"
+    },
+    "homepage": "https://github.com/company/equipment-lending-system#readme",
+    "scripts": {
+        "export": "powershell -ExecutionPolicy Bypass -File xvba_pre_export.ps1",
+        "test": "echo \"Run Excel macro: modTestData.CreateAllTestData\" && exit 0",
+        "validate": "echo \"Run Excel macro: modTestData.ShowDebugInfo\" && exit 0"
+    },
+    "engines": {
+        "excel": ">=2016",
+        "windows": ">=10"
+    },
+    "xvba": {
+        "sheets": {
+            "Dashboard": "メインダッシュボード（KPI表示・操作ボタン）",
+            "Items": "備品マスタ管理",
+            "Lending": "貸出・返却履歴",
+            "Input": "貸出・返却入力フォーム",
+            "_Config": "システム設定"
+        },
+        "modules": {
+            "modConstants": "システム定数定義",
+            "modData": "データアクセス層",
+            "modLending": "貸出・返却ビジネスロジック",
+            "modDashboard": "ダッシュボード更新処理",
+            "modUI": "UI操作・フォーマット関数",
+            "modTestData": "テストデータ生成"
+        },
+        "features": [
+            "リアルタイムKPI表示",
+            "期限超過アラート",
+            "色分けによる視覚的管理",
+            "監査ログ出力",
+            "自動在庫計算",
+            "テストデータ生成機能"
+        ]
+    },
     "dependencies": {
-        "excel-types": "1.0.0",
-        "Xlog": "1.0.0"
+        "excel-types": "1.0.0"
     },
     "devDependencies": {
         "@localsmart/xvba-cli": "^1.0.2"
