@@ -10,7 +10,8 @@
       "Bash(copy basefile.xlsm employee_management.xlsm)",
       "Bash(git checkout:*)",
       "Bash(copy:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }

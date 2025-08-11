@@ -4,10 +4,39 @@ Attribute VB_Name = "modCmn"
 '=============================================================================
 ' 概要:
 '   業務システム共通で使用する汎用機能を集約
-'   データアクセス、文字列処理、ログ、フォーマット、検証など
-'   顧客管理固有でない再利用可能な機能群
+'   データアクセス、文字列処理、ログ、フォーマット、検証など再利用可能な機能群
 '=============================================================================
 Option Explicit
+
+'=============================================================================
+' 独立動作のための定数定義
+'=============================================================================
+' エラーメッセージ定数
+Private Const ERR_SHEET_NOT_FOUND As String = "シートが見つかりません: "
+Private Const ERR_TABLE_NOT_FOUND As String = "テーブルが見つかりません: "
+Private Const ERR_COLUMN_NOT_FOUND As String = "列が見つかりません: "
+
+' フォント設定定数
+Private Const FONT_NAME As String = "Yu Gothic UI"
+Private Const FONT_SIZE_NORMAL As Integer = 10
+Private Const FONT_SIZE_HEADER As Integer = 12
+Private Const FONT_SIZE_BUTTON As Integer = 11
+Private Const FONT_COLOR_NORMAL As Long = 0
+Private Const FONT_COLOR_HEADER As Long = 16777215
+
+' 色設定定数
+Private Const BG_COLOR_HEADER As Long = 5287936
+Private Const BG_COLOR_ALTERNATE As Long = 15921906
+Private Const BORDER_COLOR_DEFAULT As Long = 8421504
+
+' 正規表現パターン定数
+Private Const REGEX_EMAIL As String = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+Private Const REGEX_PHONE As String = "^[0-9]{2,4}-[0-9]{3,4}-[0-9]{4}$"
+Private Const REGEX_ZIP As String = "^\d{3}-\d{4}$"
+Private Const REGEX_CUSTOMERID As String = "^[A-Za-z0-9]{3,20}$"
+
+' デフォルト設定値定数
+Private Const DEFAULT_LOG_DIR As String = "C:\git\xvba-mock-creator\logs\"
 
 '=============================================================================
 ' データアクセス・操作系関数
@@ -278,14 +307,27 @@ Public Sub LogError(ByVal functionName As String, ByVal errorMessage As String)
     Dim logMessage As String
     logMessage = Format(Now, "yyyy-mm-dd hh:nn:ss") & " [ERROR] " & functionName & ": " & errorMessage
     
-    ' 内部ログテーブルに記録
-    Call WriteLog(LOG_LEVEL_ERROR, functionName, errorMessage)
-    
-    ' 外部ログファイルに記録
-    Call WriteExternalLog(logMessage)
-    
     ' デバッグ出力（開発時のみ）
     Debug.Print logMessage
+    
+    ' 外部ログファイルに記録（エラー処理なし）
+    Call WriteExternalLogSafe(logMessage)
+    
+    ' エラーダイアログを表示して強制終了
+    MsgBox "システムエラーが発生しました。" & vbCrLf & vbCrLf & _
+           "関数: " & functionName & vbCrLf & _
+           "エラー: " & errorMessage & vbCrLf & vbCrLf & _
+           "詳細はログファイルをご確認ください。" & vbCrLf & _
+           "アプリケーションを終了します。", vbCritical, "システムエラー"
+    
+    ' 強制終了（保存確認なし）
+    Application.DisplayAlerts = False
+    Application.EnableEvents = False
+    ThisWorkbook.Saved = True  ' 保存済みとしてマーク
+    Application.Quit
+    
+    ' 上記で終了しない場合の最終手段
+    End
 End Sub
 
 ' 情報ログ記録
@@ -295,8 +337,6 @@ Public Sub LogInfo(ByVal functionName As String, ByVal message As String)
     Dim logMessage As String
     logMessage = Format(Now, "yyyy-mm-dd hh:nn:ss") & " [INFO] " & functionName & ": " & message
     
-    ' 内部ログテーブルに記録
-    Call WriteLog(LOG_LEVEL_INFO, functionName, message)
     
     ' デバッグ出力（開発時のみ）
     Debug.Print logMessage
@@ -309,49 +349,23 @@ Public Sub LogWarn(ByVal functionName As String, ByVal message As String)
     Dim logMessage As String
     logMessage = Format(Now, "yyyy-mm-dd hh:nn:ss") & " [WARN] " & functionName & ": " & message
     
-    ' 内部ログテーブルに記録
-    Call WriteLog(LOG_LEVEL_WARN, functionName, message)
     
     ' デバッグ出力（開発時のみ）
     Debug.Print logMessage
 End Sub
 
-' ログテーブルへの書き込み
-Public Sub WriteLog(ByVal logLevel As String, ByVal functionName As String, ByVal message As String)
-    On Error Resume Next
-    
-    Dim logsWs As Worksheet
-    Set logsWs = GetWorksheet(SHEET_LOGS)
-    If logsWs Is Nothing Then Exit Sub
-    
-    Dim logsTable As ListObject
-    Set logsTable = GetTable(logsWs, TABLE_LOGS)
-    If logsTable Is Nothing Then Exit Sub
-    
-    ' 新しい行を追加
-    Dim newRow As ListRow
-    Set newRow = logsTable.ListRows.Add
-    
-    With newRow.Range
-        .Cells(1, 1).Value = Now                    ' Timestamp
-        .Cells(1, 2).Value = logLevel               ' Level
-        .Cells(1, 3).Value = functionName           ' Function
-        .Cells(1, 4).Value = message                ' Message
-        .Cells(1, 5).Value = Environ("USERNAME")    ' User
-    End With
-End Sub
 
-' 外部ログファイル出力
-Private Sub WriteExternalLog(ByVal logMessage As String)
+' 外部ログファイル出力（安全版）
+Private Sub WriteExternalLogSafe(ByVal logMessage As String)
     On Error Resume Next
     
     Dim logDir As String
     Dim logFilePath As String
     Dim fileNum As Integer
     
-    logDir = GetConfigValue("LOG_DIR", DEFAULT_LOG_DIR)
+    logDir = DEFAULT_LOG_DIR
     
-    ' ディレクトリが存在しない場合は作成
+    ' ディレクトリが存在しない場合は作成（エラー無視）
     If Dir(logDir, vbDirectory) = "" Then
         MkDir logDir
     End If
@@ -363,6 +377,12 @@ Private Sub WriteExternalLog(ByVal logMessage As String)
     Open logFilePath For Append As fileNum
     Print #fileNum, logMessage
     Close fileNum
+End Sub
+
+' 外部ログファイル出力（従来版）
+Private Sub WriteExternalLog(ByVal logMessage As String)
+    On Error Resume Next
+    Call WriteExternalLogSafe(logMessage)
 End Sub
 
 '=============================================================================
@@ -544,7 +564,7 @@ Public Function IsValidEmail(ByVal email As String) As Boolean
     ' 正規表現パターンチェック
     Dim regex As Object
     Set regex = CreateObject("VBScript.RegExp")
-    regex.Pattern = GetConfigValue("EMAIL_REGEX", REGEX_EMAIL)
+    regex.Pattern = REGEX_EMAIL
     regex.IgnoreCase = True
     
     IsValidEmail = regex.Test(email)
@@ -562,7 +582,7 @@ Public Function IsValidPhone(ByVal phone As String) As Boolean
     ' 正規表現パターンチェック
     Dim regex As Object
     Set regex = CreateObject("VBScript.RegExp")
-    regex.Pattern = GetConfigValue("PHONE_REGEX", REGEX_PHONE)
+    regex.Pattern = REGEX_PHONE
     
     IsValidPhone = regex.Test(phone)
 End Function
@@ -579,7 +599,7 @@ Public Function IsValidZip(ByVal zip As String) As Boolean
     ' 正規表現パターンチェック
     Dim regex As Object
     Set regex = CreateObject("VBScript.RegExp")
-    regex.Pattern = GetConfigValue("ZIP_REGEX", REGEX_ZIP)
+    regex.Pattern = REGEX_ZIP
     
     IsValidZip = regex.Test(zip)
 End Function
@@ -596,7 +616,7 @@ Public Function IsValidCustomerId(ByVal customerId As String) As Boolean
     ' 正規表現パターンチェック（英数字のみ）
     Dim regex As Object
     Set regex = CreateObject("VBScript.RegExp")
-    regex.Pattern = GetConfigValue("CUSTOMERID_REGEX", REGEX_CUSTOMERID)
+    regex.Pattern = REGEX_CUSTOMERID
     regex.IgnoreCase = True
     
     IsValidCustomerId = regex.Test(customerId)
