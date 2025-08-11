@@ -72,19 +72,43 @@ End Function
 
 ' 安全なテーブル取得
 Public Function GetTable(ByVal ws As Worksheet, ByVal tableName As String) As ListObject
-    On Error Resume Next
-    Set GetTable = ws.ListObjects(tableName)
-    If Err.Number <> 0 Then
-        Call LogError("GetTable", ERR_TABLE_NOT_FOUND & tableName)
+    On Error GoTo ErrHandler
+    
+    ' テーブルが存在するかチェック
+    If Not TableExists(ws, tableName) Then
+        Call LogError("GetTable", ERR_TABLE_NOT_FOUND & tableName & " (シート: " & ws.Name & ")")
         Set GetTable = Nothing
+        Exit Function
     End If
+    
+    Set GetTable = ws.ListObjects(tableName)
+    Exit Function
+    
+ErrHandler:
+    Call LogError("GetTable", "テーブル取得エラー: " & tableName & " - " & Err.Description)
+    Set GetTable = Nothing
 End Function
 
 ' テーブル存在チェック
 Public Function TableExists(ByVal ws As Worksheet, ByVal tableName As String) As Boolean
     On Error Resume Next
-    TableExists = Not (ws.ListObjects(tableName) Is Nothing)
-    If Err.Number <> 0 Then TableExists = False
+    Dim i As Integer
+    
+    ' 引数チェック
+    If ws Is Nothing Or Len(tableName) = 0 Then
+        TableExists = False
+        Exit Function
+    End If
+    
+    ' ListObjectsコレクションをループして確認
+    For i = 1 To ws.ListObjects.Count
+        If ws.ListObjects(i).Name = tableName Then
+            TableExists = True
+            Exit Function
+        End If
+    Next i
+    
+    TableExists = False
 End Function
 
 ' 列インデックス取得（0チェック必須）
@@ -117,10 +141,6 @@ Public Sub SafeClearSheet(ByVal ws As Worksheet, Optional ByVal keepFormats As B
         Exit Sub
     End If
     
-    Dim isProt As Boolean
-    isProt = ws.ProtectContents
-    If isProt Then ws.Unprotect
-    
     ' 使用範囲を特定
     Dim found As Range
     Set found = ws.Cells.Find("*", LookIn:=xlFormulas, SearchOrder:=xlByRows, SearchDirection:=xlPrevious)
@@ -133,12 +153,9 @@ Public Sub SafeClearSheet(ByVal ws As Worksheet, Optional ByVal keepFormats As B
             End If
         End With
     End If
-    
-    If isProt Then ws.Protect UserInterfaceOnly:=True
     Exit Sub
     
 ErrHandler:
-    If isProt Then ws.Protect UserInterfaceOnly:=True
     Call LogError("SafeClearSheet", Err.Description)
 End Sub
 
