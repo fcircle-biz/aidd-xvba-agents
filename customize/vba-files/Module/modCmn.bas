@@ -33,7 +33,6 @@ Private Const BORDER_COLOR_DEFAULT As Long = 8421504
 Private Const REGEX_EMAIL As String = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 Private Const REGEX_PHONE As String = "^[0-9]{2,4}-[0-9]{3,4}-[0-9]{4}$"
 Private Const REGEX_ZIP As String = "^\d{3}-\d{4}$"
-Private Const REGEX_CUSTOMERID As String = "^[A-Za-z0-9]{3,20}$"
 
 ' デフォルト設定値定数
 Private Const DEFAULT_LOG_DIR As String = "C:\git\xvba-mock-creator\logs\"
@@ -389,7 +388,6 @@ Public Sub LogWarn(ByVal functionName As String, ByVal message As String)
     Debug.Print logMessage
 End Sub
 
-
 ' 外部ログファイル出力（安全版）
 Private Sub WriteExternalLogSafe(ByVal logMessage As String)
     On Error Resume Next
@@ -639,24 +637,6 @@ Public Function IsValidZip(ByVal zip As String) As Boolean
     IsValidZip = regex.Test(zip)
 End Function
 
-' 顧客ID形式検証
-Public Function IsValidCustomerId(ByVal customerId As String) As Boolean
-    On Error Resume Next
-    
-    If Len(customerId) < 3 Or Len(customerId) > 20 Then
-        IsValidCustomerId = False
-        Exit Function
-    End If
-    
-    ' 正規表現パターンチェック（英数字のみ）
-    Dim regex As Object
-    Set regex = CreateObject("VBScript.RegExp")
-    regex.Pattern = REGEX_CUSTOMERID
-    regex.IgnoreCase = True
-    
-    IsValidCustomerId = regex.Test(customerId)
-End Function
-
 '=============================================================================
 ' 追加のヘルパー関数（設計仕様対応）
 '=============================================================================
@@ -755,36 +735,6 @@ Public Function ValidateCsvFieldCount(ByVal fields As Variant, ByVal expectedCou
     Else
         ValidateCsvFieldCount = False
     End If
-End Function
-
-' 設定値のデフォルト取得
-Public Function GetDefaultConfigValue(ByVal key As String) As String
-    On Error Resume Next
-    
-    Select Case UCase(key)
-        Case "CSV_DIR"
-            GetDefaultConfigValue = "C:\Data\Import\"
-        Case "CSV_FILE"
-            GetDefaultConfigValue = "customers_*.csv"
-        Case "PRIMARY_KEY"
-            GetDefaultConfigValue = "CustomerID"
-        Case "ALT_KEY"
-            GetDefaultConfigValue = "Email+CustomerName"
-        Case "REQUIRED"
-            GetDefaultConfigValue = "CustomerID,CustomerName,Status"
-        Case "INACTIVATE_DAYS"
-            GetDefaultConfigValue = "180"
-        Case "EMAIL_REGEX"
-            GetDefaultConfigValue = REGEX_EMAIL
-        Case "ZIP_REGEX"
-            GetDefaultConfigValue = REGEX_ZIP
-        Case "PHONE_REGEX"
-            GetDefaultConfigValue = REGEX_PHONE
-        Case "CUSTOMERID_REGEX"
-            GetDefaultConfigValue = REGEX_CUSTOMERID
-        Case Else
-            GetDefaultConfigValue = ""
-    End Select
 End Function
 
 ' コレクションから配列への変換
