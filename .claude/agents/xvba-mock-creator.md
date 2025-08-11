@@ -158,7 +158,7 @@ Public Const FONT_COLOR_HEADER As Long = 16777215        ' 白
 - [ ] サンプルデータ反映済み（該当する場合）
 
 ### セキュリティ要件
-- [ ] Workbook_BeforeClose/BeforeSave実装なし（重要：実装禁止）
+- [ ] Workbook_BeforeClose/BeforeSave実装禁止（重要）
 - [ ] 再帰呼び出し防止
 - [ ] 防御的プログラミング
 - [ ] 外部ログによるトレーサビリティ
