@@ -42,7 +42,7 @@ Private Const DEFAULT_LOG_DIR As String = "C:\git\xvba-mock-creator\logs\"
 ' データアクセス・操作系関数
 '=============================================================================
 
-' 安全なワークシート取得
+' 安全なワークシート取得（シート名）
 Public Function GetWorksheet(ByVal sheetName As String) As Worksheet
     On Error Resume Next
     Set GetWorksheet = ThisWorkbook.Worksheets(sheetName)
@@ -50,6 +50,24 @@ Public Function GetWorksheet(ByVal sheetName As String) As Worksheet
         Call LogError("GetWorksheet", ERR_SHEET_NOT_FOUND & sheetName)
         Set GetWorksheet = Nothing
     End If
+End Function
+
+' 安全なワークシート取得（インデックス番号）
+Public Function GetWorksheetByIndex(ByVal sheetIndex As Integer) As Worksheet
+    On Error GoTo ErrHandler
+    
+    If sheetIndex <= 0 Or sheetIndex > ThisWorkbook.Worksheets.Count Then
+        Call LogError("GetWorksheetByIndex", "無効なシートインデックス: " & sheetIndex)
+        Set GetWorksheetByIndex = Nothing
+        Exit Function
+    End If
+    
+    Set GetWorksheetByIndex = ThisWorkbook.Worksheets(sheetIndex)
+    Exit Function
+    
+ErrHandler:
+    Call LogError("GetWorksheetByIndex", "シートインデックス " & sheetIndex & " でエラー: " & Err.Description)
+    Set GetWorksheetByIndex = Nothing
 End Function
 
 ' 安全なテーブル取得
@@ -620,4 +638,212 @@ Public Function IsValidCustomerId(ByVal customerId As String) As Boolean
     regex.IgnoreCase = True
     
     IsValidCustomerId = regex.Test(customerId)
+End Function
+
+'=============================================================================
+' 追加のヘルパー関数（設計仕様対応）
+'=============================================================================
+
+' 安全な数値変換
+Public Function SafeInteger(ByVal value As Variant) As Integer
+    On Error Resume Next
+    SafeInteger = CInt(value)
+    If Err.Number <> 0 Then SafeInteger = 0
+End Function
+
+' 安全なDouble変換
+Public Function SafeDouble(ByVal value As Variant) As Double
+    On Error Resume Next
+    SafeDouble = CDbl(value)
+    If Err.Number <> 0 Then SafeDouble = 0
+End Function
+
+' 空白または空文字チェック
+Public Function IsNullOrEmpty(ByVal value As Variant) As Boolean
+    IsNullOrEmpty = (IsNull(value) Or VarType(value) = vbEmpty Or Len(Trim(CStr(value & ""))) = 0)
+End Function
+
+' 文字列の最大長制限
+Public Function LimitLength(ByVal text As String, ByVal maxLength As Integer) As String
+    If Len(text) > maxLength Then
+        LimitLength = Left(text, maxLength)
+    Else
+        LimitLength = text
+    End If
+End Function
+
+' 日本の郵便番号パターン詳細検証
+Public Function IsValidJapaneseZip(ByVal zip As String) As Boolean
+    On Error Resume Next
+    
+    IsValidJapaneseZip = False
+    
+    If Len(zip) <> 8 And Len(zip) <> 7 Then Exit Function
+    
+    ' ハイフンありの場合 (123-4567)
+    If Len(zip) = 8 Then
+        If Mid(zip, 4, 1) <> "-" Then Exit Function
+        If Not IsNumeric(Left(zip, 3)) Then Exit Function
+        If Not IsNumeric(Right(zip, 4)) Then Exit Function
+        IsValidJapaneseZip = True
+    ' ハイフンなしの場合 (1234567)
+    ElseIf Len(zip) = 7 Then
+        If IsNumeric(zip) Then IsValidJapaneseZip = True
+    End If
+End Function
+
+' 日本の電話番号パターン検証
+Public Function IsValidJapanesePhone(ByVal phone As String) As Boolean
+    On Error Resume Next
+    
+    IsValidJapanesePhone = False
+    
+    ' 基本長さチェック
+    If Len(phone) < 10 Or Len(phone) > 15 Then Exit Function
+    
+    ' パターンチェック（固定電話、携帯電話）
+    If Left(phone, 1) = "0" Then
+        ' 固定電話: 0X-XXXX-XXXX または 0XX-XXX-XXXX
+        ' 携帯電話: 090-XXXX-XXXX, 080-XXXX-XXXX, 070-XXXX-XXXX
+        Dim parts As Variant
+        parts = Split(phone, "-")
+        
+        If UBound(parts) = 2 Then ' 3つの部分に分かれている
+            If Left(phone, 3) = "090" Or Left(phone, 3) = "080" Or Left(phone, 3) = "070" Then
+                ' 携帯電話パターン
+                If Len(parts(0)) = 3 And Len(parts(1)) = 4 And Len(parts(2)) = 4 Then
+                    IsValidJapanesePhone = True
+                End If
+            ElseIf Left(phone, 2) = "03" Or Left(phone, 2) = "06" Then
+                ' 主要都市固定電話パターン
+                If Len(parts(0)) = 2 And Len(parts(1)) = 4 And Len(parts(2)) = 4 Then
+                    IsValidJapanesePhone = True
+                End If
+            Else
+                ' その他固定電話パターン
+                If Len(parts(0)) = 3 And Len(parts(1)) = 3 And Len(parts(2)) = 4 Then
+                    IsValidJapanesePhone = True
+                End If
+            End If
+        End If
+    End If
+End Function
+
+' CSV行のフィールド数検証
+Public Function ValidateCsvFieldCount(ByVal fields As Variant, ByVal expectedCount As Integer) As Boolean
+    On Error Resume Next
+    
+    If IsArray(fields) Then
+        ValidateCsvFieldCount = (UBound(fields) + 1 = expectedCount)
+    Else
+        ValidateCsvFieldCount = False
+    End If
+End Function
+
+' 設定値のデフォルト取得
+Public Function GetDefaultConfigValue(ByVal key As String) As String
+    On Error Resume Next
+    
+    Select Case UCase(key)
+        Case "CSV_DIR"
+            GetDefaultConfigValue = "C:\Data\Import\"
+        Case "CSV_FILE"
+            GetDefaultConfigValue = "customers_*.csv"
+        Case "PRIMARY_KEY"
+            GetDefaultConfigValue = "CustomerID"
+        Case "ALT_KEY"
+            GetDefaultConfigValue = "Email+CustomerName"
+        Case "REQUIRED"
+            GetDefaultConfigValue = "CustomerID,CustomerName,Status"
+        Case "INACTIVATE_DAYS"
+            GetDefaultConfigValue = "180"
+        Case "EMAIL_REGEX"
+            GetDefaultConfigValue = REGEX_EMAIL
+        Case "ZIP_REGEX"
+            GetDefaultConfigValue = REGEX_ZIP
+        Case "PHONE_REGEX"
+            GetDefaultConfigValue = REGEX_PHONE
+        Case "CUSTOMERID_REGEX"
+            GetDefaultConfigValue = REGEX_CUSTOMERID
+        Case Else
+            GetDefaultConfigValue = ""
+    End Select
+End Function
+
+' コレクションから配列への変換
+Public Function CollectionToArray(ByVal col As Collection) As Variant
+    On Error Resume Next
+    
+    If col.Count = 0 Then
+        CollectionToArray = Array()
+        Exit Function
+    End If
+    
+    Dim arr() As Variant
+    ReDim arr(col.Count - 1)
+    
+    Dim i As Integer
+    For i = 1 To col.Count
+        arr(i - 1) = col(i)
+    Next i
+    
+    CollectionToArray = arr
+End Function
+
+' 配列からコレクションへの変換
+Public Function ArrayToCollection(ByVal arr As Variant) As Collection
+    On Error Resume Next
+    
+    Set ArrayToCollection = New Collection
+    
+    If Not IsArray(arr) Then Exit Function
+    
+    Dim i As Integer
+    For i = LBound(arr) To UBound(arr)
+        ArrayToCollection.Add arr(i)
+    Next i
+End Function
+
+' ファイル存在チェック
+Public Function FileExists(ByVal filePath As String) As Boolean
+    On Error Resume Next
+    FileExists = (Dir(filePath) <> "")
+End Function
+
+' ディレクトリ存在チェック
+Public Function DirectoryExists(ByVal dirPath As String) As Boolean
+    On Error Resume Next
+    DirectoryExists = (Dir(dirPath, vbDirectory) <> "")
+End Function
+
+' 安全なディレクトリ作成
+Public Function CreateDirectoryIfNotExists(ByVal dirPath As String) As Boolean
+    On Error Resume Next
+    
+    CreateDirectoryIfNotExists = False
+    
+    If DirectoryExists(dirPath) Then
+        CreateDirectoryIfNotExists = True
+        Exit Function
+    End If
+    
+    MkDir dirPath
+    If Err.Number = 0 Then
+        CreateDirectoryIfNotExists = True
+    End If
+End Function
+
+' 現在の日時を文字列として取得
+Public Function GetCurrentDateTimeString() As String
+    GetCurrentDateTimeString = Format(Now, "yyyy-mm-dd hh:nn:ss")
+End Function
+
+' 現在の日付を文字列として取得
+Public Function GetCurrentDateString() As String
+    GetCurrentDateString = Format(Date, "yyyy-mm-dd")
+End Function
+
+' ミリ秒を含む現在時刻取得
+Public Function GetCurrentTimeStamp() As String
+    GetCurrentTimeStamp = Format(Now, "yyyy-mm-dd hh:nn:ss") & "." & Format(Timer Mod 1 * 1000, "000")
 End Function

@@ -76,9 +76,46 @@ project-name/
 ### 4. シート管理戦略
 - **既存Sheet1-9を業務用途にリネーム**（新規作成禁止）
 - **シート名は定数で一元管理**（modConstants.bas）
+- **シートアクセスはインデックス番号を使用**（安定性確保）
 - **ThisWorkbook.clsでWorkbook_Open実装**
 - **Workbook_Openにて、ブックの再表示を行ってから処理する**
 - **Workbook_BeforeClose/BeforeSaveは実装禁止**（重要：セキュリティリスク）
+
+#### シートアクセス戦略（重要）
+- **問題**: シート名でのアクセスは初期化前にエラーが発生
+- **解決策**: シート番号（インデックス）による定数化アクセス
+- **実装パターン**: 
+  - シート名定数：リネーム処理用（`SHEET_DASHBOARD = "Dashboard"`）
+  - シートインデックス定数：アクセス用（`SHEET_INDEX_DASHBOARD = 1`）
+  - インデックスアクセス関数：`GetWorksheetByIndex(sheetIndex)`を使用
+
+#### シートインデックス定数の定義（modConstants.bas）
+```vba
+' シート名定数（リネーム処理用）
+Public Const SHEET_DASHBOARD As String = "Dashboard"
+Public Const SHEET_CUSTOMERS As String = "Customers"
+Public Const SHEET_STAGING As String = "Staging"
+Public Const SHEET_CONFIG As String = "_Config"
+Public Const SHEET_LOGS As String = "Logs"  
+Public Const SHEET_CODEBOOK As String = "Codebook"
+
+' シートインデックス定数（アクセス用・重要）
+Public Const SHEET_INDEX_DASHBOARD As Integer = 1
+Public Const SHEET_INDEX_CUSTOMERS As Integer = 2
+Public Const SHEET_INDEX_STAGING As Integer = 3
+Public Const SHEET_INDEX_CONFIG As Integer = 4
+Public Const SHEET_INDEX_LOGS As Integer = 5
+Public Const SHEET_INDEX_CODEBOOK As Integer = 6
+```
+
+#### 推奨アクセスパターン
+```vba
+' ❌ 従来（問題あり）
+Set ws = modCmn.GetWorksheet(SHEET_DASHBOARD)
+
+' ✅ 推奨（安定）
+Set ws = modCmn.GetWorksheetByIndex(SHEET_INDEX_DASHBOARD)
+```
 
 ## 重要な技術仕様
 
@@ -87,6 +124,12 @@ project-name/
 - **全関数にOn Error GoToパターン実装**
 - **テーブル存在チェック強化**（modCmn.basのGetWorksheet/GetTable使用）
 - **列インデックス0チェック必須**（modCmn.basのGetColumnIndex使用）
+
+### シートアクセス安定化必須項目
+- **シートインデックス定数定義**（modConstants.bas）
+- **GetWorksheetByIndex関数実装**（modCmn.bas）
+- **名前アクセス禁止**: 初期化前エラー防止
+- **インデックスアクセス徹底**: 全シートアクセスでGetWorksheetByIndex使用
 
 ### スタックオーバーフロー防止
 - **Array設定後のフォント設定は分離**
@@ -145,6 +188,8 @@ Public Const FONT_COLOR_HEADER As Long = 16777215        ' 白
 - [ ] フォント統一設定
 - [ ] 色分けルール適用
 - [ ] シート名定数管理
+- [ ] **シートインデックス定数によるアクセス**（重要）
+- [ ] **GetWorksheetByIndex関数実装**（安定性確保）
 - [ ] ボタンマクロ適切参照
 
 ### 仕様書対応チェック
