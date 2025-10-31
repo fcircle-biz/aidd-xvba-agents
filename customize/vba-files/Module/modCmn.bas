@@ -35,7 +35,7 @@ Private Const REGEX_PHONE As String = "^[0-9]{2,4}-[0-9]{3,4}-[0-9]{4}$"
 Private Const REGEX_ZIP As String = "^\d{3}-\d{4}$"
 
 ' デフォルト設定値定数
-Private Const DEFAULT_LOG_DIR As String = "C:\git\xvba-mock-creator\logs\"
+Private Const DEFAULT_LOG_DIR As String = "C:\Temp\XVBALogs\"
 
 '=============================================================================
 ' データアクセス・操作系関数

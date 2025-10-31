@@ -1,10 +1,13 @@
-# XVBA Mock Creator
+# AIDD XVBA Agents
 
-Excel VBAプロジェクト用の完全なXVBA（Extended VBA）開発環境を作成するツールです。モダンな開発ツールチェーンを使用して、Excel VBAアプリケーションの開発を効率化します。
+VBA版AI駆動開発（AI-Driven Development）プロジェクトです。Claude Codeとカスタムエージェントを活用して、Excel VBAアプリケーションの要件定義から実装、テストまでを自動化します。
+
+**動作環境**: Windows環境専用（PowerShellスクリプトとExcel VBAを使用）
 
 ## 主な機能
 
-- **Excel VBAプロジェクトの自動生成**: 完全なプロジェクト構造とサンプルコードの作成
+- **XVBA Mock Creator**: 仕様書に基づく完全なVBA実装の自動生成
+- **AI駆動開発**: Claude Codeを活用した自動実装
 - **エンコーディング変換システム**: UTF-8開発ファイルからShift-JIS本番ファイルへの自動変換
 - **パッケージ管理**: NPMスタイルのXVBAパッケージ依存関係管理
 - **VS Code統合**: IntelliSenseとデバッグサポート
@@ -43,12 +46,32 @@ Excel VBAプロジェクト用の完全なXVBA（Extended VBA）開発環境を�
 
 ## 開発ワークフロー
 
-1. **初期設定** config.jsonのexcel_fileを修正
-2. **モック生成**: `@xvba-mock-creator <作りたいモック情報>` でカスタマイズファイルを生成。
-3. **開発**: `customize/vba-files/` でVBAソースコードを編集（UTF-8エンコーディング）
-4. **ビルド**: `.\xvba_pre_export.ps1` を実行してExcel用ファイルを生成
-5. **エクスポート**: `xvba-macro list` でVBAモジュールをExcelに一括エクスポート
-6. **テスト**: Excel上でVBAコードをテスト・デバッグ
+### 1. 初期設定
+config.jsonのexcel_fileを修正
+
+### 2. VBA実装の自動生成
+```
+@xvba-mock-creator <仕様書情報>
+```
+仕様書に基づいて完全なVBA実装を自動生成。以下が自動で作成されます：
+- XVBA開発環境構成
+- 設計書に基づいたVBAコード（クラス・モジュール）
+- customize/vba-files/配下のソースファイル（UTF-8）
+
+### 3. 開発・カスタマイズ
+`customize/vba-files/` でVBAソースコードを確認・編集（UTF-8エンコーディング）
+
+### 4. ビルド
+```powershell
+.\xvba_pre_export.ps1
+```
+UTF-8ファイルをShift-JISに変換してExcel用ファイルを生成
+
+### 5. Excelへのエクスポート
+`xvba-macro list` でVBAモジュールをExcelに一括エクスポート
+
+### 6. テスト・デバッグ
+Excel上でVBAコードをテスト・デバッグ
 
 参考）https://note.com/kiyo_ai_note/n/n9653e7238c49
 
@@ -136,6 +159,26 @@ XVBAは文字エンコーディングの二重管理システムを採用：
 - Microsoft Excel（.xlsmファイルサポート）
 - VS Code（推奨開発環境）
 
+## XVBA Mock Creatorエージェント
+
+このプロジェクトでは、VBA実装を自動生成する専用エージェントを提供しています：
+
+- **xvba-mock-creator**: 仕様書に基づいてXVBA開発環境と完全なVBA実装を自動生成
+
+エージェントは`.claude/subagents/xvba-mock-creator.md`に定義されています。
+
+### 使用例
+```
+@xvba-mock-creator 在庫管理システムを作成してください。商品マスタ、入出庫履歴、在庫一覧の機能が必要です。
+```
+
+エージェントは以下を自動で行います：
+1. 要件の分析と設計
+2. config.json、package.jsonの作成
+3. VBAクラスとモジュールの実装
+4. customize/vba-files/配下へのソースコード配置
+5. 実装ガイドの提供
+
 ## ライセンス
 
-このプロジェクトはモダンなExcel VBA開発環境の構築を目的としています。
+このプロジェクトはAI駆動開発によるモダンなExcel VBA開発環境の構築を目的としています。
